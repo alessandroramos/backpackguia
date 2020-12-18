@@ -18,7 +18,9 @@ import {
     CustomButtonProfSenha,
     AreaButtoms,
     InputAreaSwitch,
-    InputAreaSwitchText
+    InputAreaSwitchText,
+    InputAreaCamera,
+    CustomButtonCamaGale
 } from '../Styles/styles';
 import Api from '../../Api'
 import { useNavigation } from '@react-navigation/native';
@@ -29,7 +31,7 @@ import PersonIcom from '../../assets/person.svg';
 import CelularIcom from '../../assets/celular.svg';
 import IconSvgAvatar from '../../assets/camera.svg'
 import AsyncStorage from  '@react-native-community/async-storage';
-import ImagePicker from 'react-native-image-picker';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import RNFFetchBlob from 'react-native-fetch-blob'
 window.XMLHttpRequest = RNFFetchBlob.polyfill.XMLHttpRequest;
 window.Blob = RNFFetchBlob.polyfill.Blob;
@@ -47,12 +49,13 @@ export default () => {
     const [ passwordField, setPasswordField ] = useState('');
     const [ passwordFieldNova, setPasswordFieldNova ] = useState('');
     const [ passwordFieldConfirma, setPasswordFieldConfirma ] = useState('');
-
+    const [ modalGaleria, setModalGaleria ] = useState(false);
     const options = {
         title: 'Selecionar Imagem!',
         storageOptions: {
           skipBackup: true,
           path: 'images',
+          saveToPhotos: true,
         },
     };
     useEffect(()=>{
@@ -134,46 +137,52 @@ export default () => {
     }
 
 
-    const handleAlterAvataClick = async () => {
+    const pegarImagem = async (galeria) => {
         const token = await AsyncStorage.getItem('tokenUser');
         const user = JSON.parse(token);
         const uid = user.uid;
-        ImagePicker.showImagePicker(options, (response) => {
-            if (response.didCancel) {
-              console.log('User cancelled image picker');
-            } else if (response.error) {
-              console.log('ImagePicker Error: ', response.error);
-            } else if (response.customButton) {
-              console.log('User tapped custom button: ', response.customButton);
-            } else {
-                setLoading(true);
-                const source = { uri: response.uri  };       
-                let uri = source.uri.replace('file://', '');
-                let mime = 'image/jpeg';
-                let nomeImage = 'imagem.jpg'
+        if(galeria == true){
+            launchImageLibrary(options, (response) => {
+                enviaImagem (response, uid);
+            })
+        }else{
+            launchCamera(options, (response) => {
+                enviaImagem (response, uid);
+            })
+        }
+    }    
 
-                let letras = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
-                let aleatorio = '';
-                for (var i = 0; i < 33; i++) {
+    const enviaImagem = (response, uid) => {
+        if (response.didCancel) {
+            console.log('User cancelled image picker');
+        } else if (response.error) {
+          console.log('ImagePicker Error: ', response.error);
+        } else if (response.customButton) {
+          console.log('User tapped custom button: ', response.customButton);
+        } else {
+            setLoading(true);
+            const source = { uri: response.uri  };       
+            let uri = source.uri.replace('file://', '');
+            let mime = 'image/jpeg';
+            let nomeImage = 'imagem.jpg'
+            let letras = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
+            let aleatorio = '';
+            for (var i = 0; i < 33; i++) {
                 var rnum = Math.floor(Math.random() * letras.length);
                     aleatorio += letras.substring(rnum, rnum + 1);
-                }
-                nomeImage = aleatorio+'.jpg';
-                RNFFetchBlob.fs.readFile(uri, 'base64')
-                .then((data) =>{
-                    return RNFFetchBlob.polyfill.Blob.build(data, { type:mime+';BASE64'})
-                })
-                .then((blob) =>{
-                    let url_imagem = '';
-                    uploadBlob = blob;
-                    Api.setAvatar(nomeImage, blob, mime, uid).then(function() {
-                        getUsuario();
-                    })
-
-                })
             }
-        })
-
+            nomeImage = aleatorio+'.jpg';
+            RNFFetchBlob.fs.readFile(uri, 'base64')
+            .then((data) =>{
+                return RNFFetchBlob.polyfill.Blob.build(data, { type:mime+';BASE64'})
+            })
+            .then((blob) =>{
+                uploadBlob = blob;
+                Api.setAvatar(nomeImage, blob, mime, uid).then(function() {
+                    getUsuario();
+                })
+            })
+        }
     }
     const handleSenhaClick = () => {
         setModalVisible(true);
@@ -202,9 +211,24 @@ export default () => {
                 alert("A Senha diferente da confirmada.");
             }   
 
-        }
-        
+        }        
     }
+    const handleAlterAvataClick = async () => {
+        setModalGaleria(true)
+    }
+    const handleGaleriaClick = async () => {
+        setModalGaleria(false)        
+        setLoading(true)
+        await pegarImagem(true);
+        setLoading(false)
+    }
+    const handleCameraClick = async () => {
+        setModalGaleria(false)
+        setLoading(true)
+        await pegarImagem(false);
+        setLoading(false)
+    }
+    
     const handleLogoutClickCancelar = () => {
         setModalVisible(false);
     }
@@ -248,6 +272,24 @@ export default () => {
                                     <CustomButtonTextProf>Cancelar</CustomButtonTextProf>
                                 </CustomButtonProfSenha>                
                             </InputAreaSenha>
+                        </InputArea>
+                    </Modal>
+                    <Modal
+                        visible = {modalGaleria}
+                        animationType = "slide"                     
+                    >
+                        <InputArea>
+                            <InputAreaCamera>
+                                <CustomButtonTextProf>Escolha Galeria ou Foto</CustomButtonTextProf>
+                                <InputAreaSenha>
+                                    <CustomButtonCamaGale onPress={handleGaleriaClick}>
+                                        <CustomButtonTextProf>Galeria</CustomButtonTextProf>    
+                                    </CustomButtonCamaGale>
+                                    <CustomButtonCamaGale onPress={handleCameraClick}>
+                                        <CustomButtonTextProf>Foto</CustomButtonTextProf>    
+                                    </CustomButtonCamaGale>
+                                </InputAreaSenha>
+                            </InputAreaCamera>
                         </InputArea>
                     </Modal>
                     <BackButtom onPress={hendleBackButtom}>

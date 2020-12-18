@@ -21,6 +21,29 @@ export const InputArea = styled.View`
     width: 100%;
     padding: 10px;
 `;
+export const InputAreaCamera = styled.View`
+    padding: 10px;
+    width: 90%;
+    height: 40%
+    margin-right: 5%;
+    margin-left: 5%;
+    margin-top: 50%;
+    background-color:  #fff;
+    border: 2px solid #FF9B29;
+`;
+export const CustomButtonCamaGale = styled.TouchableOpacity`
+    height: 90px;
+    width: 90px;
+    margin-right: 7%;
+    margin-left: 7%;
+    margin-top: 20px;
+    background-color:  #FF9B29;
+    border-radius: 5px;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #3D4140;
+`;
+
 
 export const CustomButton = styled.TouchableOpacity`
     height: 50px;

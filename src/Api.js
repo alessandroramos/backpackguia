@@ -162,7 +162,7 @@ class Api{
     }
 //------------------------------------------------------------------------------------
     setImageStorage(nomeImage, blob, mime, uid){
-//        console.log("Api.setImageStorage")
+        console.log("Api.setImageStorage")
         let pct = 0;
         let url_imagem = '';
         let imagem = firebase.storage().ref().child(nomeImage);
@@ -179,7 +179,9 @@ class Api{
            .then(function() {
                 return firebase.database().ref('advogados').child(uid).once('value')
                 .then((snapshot)=>{
-                    foto = snapshot.val().foto;
+                    if(snapshot.val().foto){
+                        foto = snapshot.val().foto;
+                    }
                     return foto;
                 })
                 .then(function() {

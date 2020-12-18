@@ -59,7 +59,6 @@ export default () => {
                         }
                 });
                 const favoritos = [];
-                favoritos.push({key:"agr "+uid})
                 Api.setUsuarioInfo(uid, nomeField, emailField, celularField, advogadoField, avatar, favoritos)
                 .catch((error)=>{
                     alert(error)

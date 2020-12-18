@@ -35,6 +35,7 @@ export default () => {
     const HandleLocationFinder = async () => {
         setLoading(true);
         await getAdvogados();
+        setLoading(false);
     }
     const getAdvogados = async () => {
         setLoading(true);
@@ -43,49 +44,52 @@ export default () => {
         const user = JSON.parse(token);
         const uid = user.uid;
         await Api.getUsuario(uid).then((snapshot)=>{
-            const registro = (snapshot.val().favoritos.length);
-            let cont = 0;
-            let addLista = list;
-            addLista = [];
-            const addList = snapshot.val().favoritos.forEach((childItem)=>{
-                const uid = childItem.key;
-                Api.getAdvogado(uid).then((snapshot)=>{                    
-                    let con =0;
-                    let est = 0;
-                    let estrela = 0;
-                    if(snapshot.val().depoimento){
-                        snapshot.val().depoimento.forEach((dep)=>{
-                            con ++
-                            est = est+dep.estrela
-                        });
-                        estrela = (Math.trunc(est/con));
-                        let resto = ((est%cont)/con)
-                        if(resto < 0.25){
-                            resto = 0;
-                        }else{
-                            if(resto >0.24 && resto < 0.75 ){
-                                resto = 0.5;
-                            }else{
+            if(snapshot.val().favoritos){
+                const registro = (snapshot.val().favoritos.length);
+                let cont = 0;
+                let addLista = list;
+                addLista = [];
+                snapshot.val().favoritos.forEach((childItem)=>{
+                    const uid = childItem.key;
+                    console.log('Favorites.getAdvogado')
+                    Api.getAdvogado(uid).then((snapshot)=>{                    
+                        let con =0;
+                        let est = 0;
+                        let estrela = 0;
+                        if(snapshot.val().depoimento){
+                            snapshot.val().depoimento.forEach((dep)=>{
+                                con ++
+                                est = est+dep.estrela
+                            });
+                            estrela = (Math.trunc(est/con));
+                            let resto = ((est%con)/con)
+                            if(resto < 0.25){
                                 resto = 0;
-                                estrela ++;
+                            }else{
+                                if(resto >0.24 && resto < 0.75 ){
+                                    resto = 0.5;
+                                }else{
+                                    resto = 0;
+                                    estrela ++;
+                                }
                             }
+                            estrela = estrela + resto;
                         }
-                        estrela = estrela + resto;
-                    }
-                    
-                    addLista.push({
-                        key: snapshot.key,
-                        nome: snapshot.val().nome,
-                        estrela: estrela,
-                        avatar: snapshot.val().avatar,
+                        
+                        addLista.push({
+                            key: snapshot.key,
+                            nome: snapshot.val().nome,
+                            estrela: estrela,
+                            avatar: snapshot.val().avatar,
+                        })
+                        cont ++
+                        if(cont == registro){
+                            setList(addLista);
+                            setLoading(false);
+                        }
                     })
-                    cont ++
-                    if(cont == registro){
-                        setList(addLista);
-                        setLoading(false);
-                    }
                 })
-            })
+            }
         })
     }
 

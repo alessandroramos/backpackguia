@@ -110,19 +110,18 @@ export default () => {
                     }
                     estrela = estrela + resto;
                     setEstrela(estrela);
-                }
-                
-
-                
+                }                
                 let addLista = [];
                 let addLista1 = [];
                 Api.getUsuario(uid).then((snapsho)=>{
                     setFavor(false);
-                    snapsho.val().favoritos.forEach((childItem)=>{
-                        if(childItem.key == key){
-                            setFavor(true);
-                        };
-                    })
+                    if(snapsho.val().favoritos){
+                        snapsho.val().favoritos.forEach((childItem)=>{
+                            if(childItem.key == key){
+                                setFavor(true);
+                            };
+                        })
+                    }
                 })
                 snapshot.val().foto.forEach((childItem)=>{
                     if(childItem.url_imagem){
@@ -159,13 +158,15 @@ export default () => {
         const favoritos = [];
         await Api.getUsuario(uid).then((snapshot)=>{
             let existe = false;
-            snapshot.val().favoritos.forEach((childItem)=>{
-                if(childItem.key == key){
-                    existe = true;
-                }else{
-                    favoritos.push({key:childItem.key})
-                };
-            })
+            if(snapshot.val().favoritos){
+                snapshot.val().favoritos.forEach((childItem)=>{
+                    if(childItem.key == key){
+                        existe = true;
+                    }else{
+                        favoritos.push({key:childItem.key})
+                    };
+                })
+            }
             if(existe){
                 setFavor(false)
             }else{
@@ -214,7 +215,13 @@ export default () => {
         Linking.openURL('mailto:'+userInfo.email+'?subject=Contado Back Pack Guia=body');
     }
     const hendleBackButtomSite = () => {
-        Linking.openURL (userInfo.site); 
+        Linking.canOpenURL (userInfo.site) .then (supported => { 
+            if (supported) { 
+                Linking.openURL (userInfo.site); 
+            }else{
+                Linking.openURL ("https://"+userInfo.site);
+            }
+        })
     }
     const hendleBackButtomDepoimento = () => {
         navigation.navigate('Appointments', {key: key}); 
