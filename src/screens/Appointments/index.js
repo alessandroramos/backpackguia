@@ -155,6 +155,9 @@ export default () => {
 
     return (
         <ContainerPerfil>
+            <HeaderAreaFeke>
+                <HeaderTitleFeke />
+            </HeaderAreaFeke>
             {loading && true ?
                 <LoadingIcon size="large" color="#000000" />
             :

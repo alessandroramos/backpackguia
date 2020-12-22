@@ -91,12 +91,23 @@ export const Scroller = styled.ScrollView`
     padding: 10px;
 `;
 export const HeaderArea = styled.View`
+    margin-right: 10px;
+    margin-left: 10px;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
 `;
+export const HeaderAreaFeke = styled.View`
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+`;
+export const HeaderTitleFek = styled.Text`
+    width: 80%;
+`;
+
 export const HeaderTitle = styled.Text`
-    width: 100%;
+    width: 80%;
     font-size: 24px;
     font-weight: bold;
     color: #000000;
@@ -117,13 +128,14 @@ export const SearchButton = styled.TouchableOpacity`
 `; 
 export const LocationArea = styled.View`
     background-color: #ffffff;
-    height: 60PX;
     border-radius: 30PX;
     flex-direction: row;
     align-items: center;
-    padding-left: 20px;
-    padding-right: 20px;
-    margin-top: 30px;
+    padding: 7px;
+    padding-right: 10px;
+    margin-top: 20px;
+    margin-right: 10px;
+    margin-left: 10px;
     border: 1px solid #3D4140;
 `;
 export const LocationInput = styled.TextInput`
@@ -132,13 +144,14 @@ export const LocationInput = styled.TextInput`
     color: #fff;
 `;
 export const LocationFinder = styled.TouchableOpacity`
-    width: 24px;
-    height: 24px;
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
 `;
 
 export const ListArea = styled.View`
-    margin-top: 30px;
-    margin-bottom: 30px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 `;
 export const  ScrollPerfil = styled.ScrollView`
     flex: 1;
@@ -534,6 +547,7 @@ export const SearchImput = styled.TextInput`
     color: #000000; 
 `;
 export const HeaderTitleFav = styled.Text`
+    width: 100%;
     font-size: 24px;
     font-weight: bold;
     color: #000000;

@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Platform, RefreshControl} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { request, PERMISSIONS } from 'react-native-permissions';
-import Geolocation from  '@react-native-community/geolocation';
 import { 
     ContainerTab,
     Scroller,
     HeaderArea,
-    HeaderTitle,
-    SearchButton,
-    LocationArea,
-    LocationInput,
-    LocationFinder,
+    HeaderTitleFav,
     LoadingIcon, 
     ListArea
 } from '../Styles/styles';
@@ -104,7 +98,7 @@ export default () => {
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }>
                 <HeaderArea>
-                    <HeaderTitle>Favoritos</HeaderTitle>
+                    <HeaderTitleFav>Favoritos</HeaderTitleFav>
                 </HeaderArea>
                 {loading && true ?
                     <LoadingIcon size="large" color="#000000" />

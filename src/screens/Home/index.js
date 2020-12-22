@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Platform, RefreshControl} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { request, PERMISSIONS } from 'react-native-permissions';
-import Geolocation from  '@react-native-community/geolocation';
+import Geolocation from 'react-native-geolocation-service';
 import { 
     ContainerTab,
     Scroller,
@@ -10,27 +10,31 @@ import {
     HeaderTitle,
     SearchButton,
     LocationArea,
-    LocationInput,
     LocationFinder,
     LoadingIcon, 
-    ListArea
+    ListArea,
+    HeaderAreaFeke,
+    HeaderTitleFeke
 } from '../Styles/styles';
-import ListItem from '../../components/ListItem'
+import ListItem from '../../components/ListItem';
 
 
-import Api from '../../Api'
-import SearchIcon from '../../assets/search.svg'
-import WyLocationIcon from '../../assets/my_location.svg'
-import { FlatList } from 'react-native-gesture-handler';
-
+import Api from '../../Api';
+import SearchIcon from '../../assets/search.svg';
+import WyLocationIcon from '../../assets/my_location.svg';
+import LocationInput from '../../components/LocationInput';
 export default () => {
     const navigation = useNavigation();
     const [ locationText, setLocationText ] =useState('');
-    const [ coords, setCoords ] =useState(null);
+    const [ coords, setCoords ] =useState([]);
     const [ loading, setLoading ] = useState(false);
     const [ list, setList ] = useState([]);
     const [ refreshing, setRefreshing ] = useState(false);
     const [ refreHome, setRefreHome ] = useState(false);
+    const [ cidade, setCidade ] = useState('');
+    const [ uf, setUf ] = useState('');
+    const [ pais, setPais ] = useState('');
+  //  const geocoder  = new google.maps.Geocoder();
 
 
     useEffect(()=>{
@@ -40,7 +44,7 @@ export default () => {
     const HandleLocationFinder = async () => {
         setCoords(null);
         setLoading(true);
-/*        let result = await request(
+        let result = await request(
             Platform.os === 'ios' ?
             PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
             :
@@ -52,15 +56,20 @@ export default () => {
             setList([]);
             Geolocation.getCurrentPosition((info)=>{
                 setCoords(info.coords);
-*/                getAdvogados();
-/*            },
+//                console.log(info.coords);
+
+
+                getAdvogados();
+            },
             error => {
                 alert.log(error);
             },
-            { enableHighAccuracy: true, timeout: 10000}
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
             )
+        }else{
+            console.log('Erro apermission');
+            getAdvogados();
         }
-*/
     }
     const getAdvogados = async () => {
         setLoading(true);
@@ -117,29 +126,48 @@ export default () => {
         setRefreshing(false)
         getAdvogados();
     }
+    const onLocationSelected = async ( data, details ) => {
+        await details.address_components.forEach((item)=>{
+            if(item.types[0] == 'administrative_area_level_2'){
+                setCidade(item.long_name)
+            }else{if(item.types[0] == 'administrative_area_level_1'){
+                    setUf(item.short_name)
+                }else{if(item.types[0] == 'country'){
+                        setPais(item.long_name)
+                    }   
+                }   
+            }
+        });
+        setCoords(details.geometry.location);
+        getAdvogados();
+    }
 
     return (
         <ContainerTab>
-            <Scroller refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }>
-                <HeaderArea>
+            <HeaderArea>
                     <HeaderTitle numberOfLines={2}>Encontre seu guia!</HeaderTitle>
                     <SearchButton onPress={()=>navigation.navigate('Search')}>
                         <SearchIcon width="26" height="26" fill="#FF9B29" />
                     </SearchButton>
-                </HeaderArea>
-                <LocationArea>
-                    <LocationInput 
-                        placeholder="Informe a localização!"
-                        placeholderTextColor="#000000"
-                        value={locationText}
-                        onChangeText={t=>setLocationText(t)}
+            </HeaderArea>
+            <LocationArea>
+                <LocationInput onPress={ onLocationSelected }    />
+                <LocationFinder onPress={HandleLocationFinder}>
+                    <WyLocationIcon width="30" height="30" fill="#FF9B29" />
+                </LocationFinder>
+            </LocationArea>
+
+
+            <Scroller refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }>
+
+                <HeaderAreaFeke>
+                    <HeaderTitleFeke 
                     />
-                    <LocationFinder onPress={HandleLocationFinder}>
-                        <WyLocationIcon width="30" height="30" fill="#FF9B29" />
-                    </LocationFinder>
-                </LocationArea>
+                </HeaderAreaFeke>
+
+
                 {loading && true ?
                     <LoadingIcon size="large" color="#000000" />
                 :
