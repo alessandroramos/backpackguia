@@ -1,8 +1,6 @@
 import firebase from 'firebase';
 import AsyncStorage from  '@react-native-community/async-storage';
 
-
-
 //-------------------------------Conectar-----------------------------------------------
 let config = {
     apiKey: "AIzaSyBGncCVLvGR29wbc2H-i17RZ4kmptLUNKI",
@@ -66,10 +64,12 @@ class Api{
             favoritos: favoritos,
         });
     }
+
     setAlterarSenha(passwordFieldNova){
         console.log("Api.setAlterarSenha")
        return firebase.auth().currentUser.updatePassword(passwordFieldNova);
     }
+    
     setUserAtu(telefone, nome, advogado, uid){
         console.log("Api.setUserAtu")
         firebase.database().ref('usuarios').child(uid).child('telefone').set(telefone).catch((error)=>{ 
@@ -91,14 +91,16 @@ class Api{
         });;        
     }
 //-------------------------------Fim Usuario--------------------------------------------
-    getAdvogados (lat=null, lng=null, address=null)  {        
+    getAdvogados (lat, lng, cidade, uf)  {        
         console.log("Api.getAdvogados")
+        console.log(lat, lng, cidade, uf)
         return firebase.database().ref('advogados')
+            .orderByChild('cidade').equalTo(cidade)
             .once('value', (snapshot)=>{
             });
     }
 
-    setAdvogados (uid, nome, oab, logradoro, numero, complemento, cidade, uf, telefone, 
+    setAdvogados (uid, nome, oab, logradoro, numero, complemento, cidade, uf, pais, descricao, coords,telefone, 
                     celular, email, site, avatar, obs, situacao, atuacao, foto, depoimento, 
                     face, insta, linkedin, estrelas)  {
             console.log("Api.setAdvogados")
@@ -109,7 +111,10 @@ class Api{
             numero: numero || '', 
             complemento: complemento || '', 
             cidade: cidade || '', 
-            uf: uf || '', 
+            uf: uf || '',
+            pais: pais || '',
+            descricao: descricao || '', 
+            coords: coords || '', 
             telefone: telefone || '',
             celular: celular, 
             email: email || '', 
@@ -126,6 +131,7 @@ class Api{
             estrelas: estrelas || ''
         });
     }
+
     setAdvogadosDepoimento (uid, depoimento )  {
         console.log('Api.setAdvogadosDepoimento');
         console.log(uid);
@@ -148,6 +154,7 @@ class Api{
             .once('value', (snapshot)=>{
         });
     }
+
     getAdvogadoSearch(nome){
         console.log('Api.getAdvogadoSearch '+nome)
         return firebase.database().ref('advogados')
@@ -156,6 +163,7 @@ class Api{
         })
 
     }
+
     getAdvogadoFavorito(uid){
         console.log('Api.getAdvogadoFavorito')
         return firebase.database().ref('advogados').child(uid);
@@ -193,6 +201,7 @@ class Api{
             })
         })        
     }
+
     deleteImageStorage( fotos, uid){
         console.log("Api.deleteImageStorage")
         let foto = ['https://firebasestorage.googleapis.com/v0/b/backpack-f5a42.appspot.com/o/logo%2FLogoBackPack3.jpeg?alt=media&token=0cf3d848-90c8-426a-bae3-08b894ab2f8e']; 
@@ -203,6 +212,7 @@ class Api{
         })
         return firebase.database().ref('advogados').child(uid).child('foto').set(foto);
     }
+
     setAvatar(nomeImage, blob, mime, uid){
         console.log("Api.deleteImageStorage")
         let pct = 0;
@@ -224,6 +234,6 @@ class Api{
             })
         })        
     }
-
 }
+
 export default new Api();

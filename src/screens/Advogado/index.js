@@ -1,7 +1,8 @@
 import React, { useState, useEffect} from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { StyleSheet } from "react-native";
+import { StyleSheet, Modal } from "react-native";
 import { 
+    Container,
     ContainerPerfil,
     InputArea,
     CustomButton,
@@ -17,6 +18,10 @@ import {
     AtuacaoCheckBoxView,
     AtuacaoCheckBoxTextTituloVire,
     AtuacaoCheckBoxTextTitulo,
+    InputAreaLoc,
+    HeaderTitleLoc,
+    LocationArea,
+    LocationFinder
 } from '../Styles/styles';
 import AsyncStorage from  '@react-native-community/async-storage';
 import CheckBox from '@react-native-community/checkbox';
@@ -33,8 +38,11 @@ import OlhoIcon from '../../assets/olho.svg'
 import FacebookIcon from '../../assets/facebookP.svg'
 import InstagramIcon from '../../assets/instagramP.svg'
 import LinkedinIcon from '../../assets/linkedinP.svg'
-
+import WyLocationIcon from '../../assets/my_location.svg';
 import Api from '../../Api'
+import LocationInput from '../../components/LocationInput';
+import SignInput from '../../components/SignInput'
+import LockIcom from '../../assets/lock.svg';
 
 
 
@@ -47,8 +55,9 @@ export default () => {
     const [ logradoroField, setLogradoroField ] = useState('');
     const [ numeroField, setNumeroField ] = useState('');
     const [ complementoField, setComplementoField ] = useState('');
-    const [ cidadeField, setCidadeField ] = useState('');
-    const [ ufField, setUfField ] = useState('');
+    const [ cidade, setCidade ] = useState('');
+    const [ uf, setUf ] = useState('');
+    const [ pais, setPais ] = useState('');
     const [ telefoneField, setTelefoneField ] = useState('');
     const [ celularField, setCelularField ] = useState('');
     const [ emailField, setEmailField ] = useState('');
@@ -62,6 +71,8 @@ export default () => {
     const [ linkedinField, setLinkedinField ] = useState('');
     const [ estrelasField, setEstrelasField ] = useState('');
     const [ situacao, setSituacao ] = useState(true);
+    const [ descricao, setDescricao ] =useState("Click para setar sua localização.")
+
 
     const [ atuacao, setAtuacao ] = useState([]);
 
@@ -82,11 +93,11 @@ export default () => {
     const [ sustentavel, setSustentavel ] = useState(false);
     const [ religioso, setReligioso ] = useState(false);
     const [ rural, setRural ] = useState(false);
+    const [ modalVisible, setModalVisible ] = useState(false);
 
 
 
-    const [ lat, setLat ] = useState('');
-    const [ lng, setLng ] = useState('');
+    const [ coords, setCoords ] = useState('');
     const getAdvogados = async () => {
         setLoading(true);
 
@@ -117,8 +128,11 @@ export default () => {
                 setLogradoroField(snapshot.val().logradoro),
                 setNumeroField(snapshot.val().numero),
                 setComplementoField(snapshot.val().complemento),
-                setCidadeField(snapshot.val().cidade),
-                setUfField(snapshot.val().uf),
+                setCidade(snapshot.val().cidade),
+                setUf(snapshot.val().uf),
+                setPais(snapshot.val().pais),
+                setDescricao(snapshot.val().descricao),
+                setCoords(snapshot.val().coords)
                 setTelefoneField(snapshot.val().telefone),
                 setCelularField(snapshot.val().celular),
                 setEmailField(snapshot.val().email),
@@ -267,7 +281,7 @@ export default () => {
                 if(oabField) { 
                     if(celularField){
                         await Api.setAdvogados( uid, nomeField, oabField, logradoroField, numeroField, complementoField,
-                            cidadeField, ufField, telefoneField, celularField, emailField, siteField, avatar, 
+                            cidade, uf, pais, descricao, coords, telefoneField, celularField, emailField, siteField, avatar, 
                             obsField, situacao, aAtuacao, foto, depoimento, faceField, instaField, linkedinField, estrelasField)
                             .then(function() {
                                 navigation.navigate('Imagens');
@@ -324,276 +338,311 @@ export default () => {
     const hendleBackButtom = () => {
         navigation.goBack();
     };
-    return (
-        <ScrollView>
-            {loading && true ?
-                <LoadingIcon size="large" color="#FFFFFF" />
-            :
-                <ContainerPerfil>
-                    <BackButtom onPress={hendleBackButtom}>
-                        <BackIcon width="44" height="44" fill="#000000" />
-                    </BackButtom>
-                    <InputArea>
-                        <Titulo>Cadastro de Guia</Titulo>
-                        <CadInput 
-                            IconSvg={PersonIcom} 
-                            placeholder="Nome"
-                            value={nomeField}
-                            onChangeText={t=>setNomeField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={CameraIcon} 
-                            placeholder="CadasTur / UF"
-                            value={oabField}
-                            onChangeText={t=>setOabField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={CasaIcon} 
-                            placeholder="Logradoro"
-                            value={logradoroField}
-                            onChangeText={t=>setLogradoroField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={CasaIcon} 
-                            placeholder="Numero"
-                            value={numeroField}
-                            onChangeText={t=>setNumeroField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={CasaIcon} 
-                            placeholder="Complemento & Bairro"
-                            value={complementoField}
-                            onChangeText={t=>setComplementoField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={CasaIcon} 
-                            placeholder="Cidade"
-                            value={cidadeField}
-                            onChangeText={t=>setCidadeField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={CasaIcon} 
-                            placeholder="UF"
-                            value={ufField}
-                            onChangeText={t=>setUfField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={FacebookIcon} 
-                            placeholder="Informe o link de seu Facebook"
-                            value={faceField}
-                            onChangeText={t=>setFaceField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={InstagramIcon} 
-                            placeholder="Informe o link de seu Instagran"
-                            value={instaField}
-                            onChangeText={t=>setInstaField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={LinkedinIcon} 
-                            placeholder="Informe o link de seu Linkedin"
-                            value={linkedinField}
-                            onChangeText={t=>setLinkedinField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={CelularIcom} 
-                            placeholder="Whatsapp"
-                            value={maskTele(celularField)}
-                            onChangeText={t=>setCelularField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={TelefoneIcon} 
-                            placeholder="Telefone Fixo"
-                            value={maskTele(telefoneField)}
-                            onChangeText={t=>setTelefoneField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={SiteIcon} 
-                            placeholder="Site"
-                            value={siteField}
-                            onChangeText={t=>setSiteField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={EmailIcon} 
-                            placeholder="Digite seu e-mail"
-                            value={emailField}
-                            onChangeText={t=>setEmailField(t)}
-                        />
-                        <CadInput 
-                            IconSvg={OlhoIcon} 
-                            placeholder="Observação"
-                            value={obsField}
-                            onChangeText={t=>setObsField(t)}
-                        />
-                        <AtuacaoCheckBoxView>
-                            <AtuacaoCheckBoxTextTituloVire>
-                                <AtuacaoCheckBoxTextTitulo>Tipo de Turismo</AtuacaoCheckBoxTextTitulo>
-                            </AtuacaoCheckBoxTextTituloVire>
-                            <AtuacaoCheck>
-                                <AtuacaoCheckBox>
-                                   <AtuacaoCheckBoxInd>
-                                        <CheckBox
-                                            value={agroturismo}
-                                            onValueChange={setAgroturismo}
-                                            style={styles.checkbox}
-                                        />
-                                        <AtuacaoCheckBoxText>Agroturismo</AtuacaoCheckBoxText>
-                                    </AtuacaoCheckBoxInd>
-                                    <AtuacaoCheckBoxInd>
-                                        <CheckBox
-                                            value={aventura}
-                                            onValueChange={setAventura}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Aventura</AtuacaoCheckBoxText> 
-                                    </AtuacaoCheckBoxInd>
-                                </AtuacaoCheckBox> 
-                                <AtuacaoCheckBox>  
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={consumo}
-                                            onValueChange={setConsumo}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Consumo</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                                    <AtuacaoCheckBoxInd>                    
-                                        <CheckBox
-                                            value={cultural}
-                                            onValueChange={setCultural}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Cultural</AtuacaoCheckBoxText>
-                                    </AtuacaoCheckBoxInd>                       
-                                </AtuacaoCheckBox>
-                                <AtuacaoCheckBox>  
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={ecoturismo}
-                                            onValueChange={setEcoturismo}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Ecoturismo</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={esporte}
-                                            onValueChange={setEsporte}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Esporte</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                                </AtuacaoCheckBox>
-
-                                <AtuacaoCheckBox>  
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={eventos}
-                                            onValueChange={setEventos}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Eventos</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={gastronomico}
-                                            onValueChange={setGastronomico}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Gastronomico</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                                </AtuacaoCheckBox>
-                                <AtuacaoCheckBox>  
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={incentivo}
-                                            onValueChange={setIncentivo}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Incentivo</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={massa}
-                                            onValueChange={setMassa}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Massa</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                                </AtuacaoCheckBox>
-                                <AtuacaoCheckBox>  
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={nautico}
-                                            onValueChange={setNautico}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Nautico</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={negocios}
-                                            onValueChange={setNegocios}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Negocios</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                                </AtuacaoCheckBox>
-                                <AtuacaoCheckBox>  
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={pedagogico}
-                                            onValueChange={setPedagogico}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Pedagogico</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={saude}
-                                            onValueChange={setSaude}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Saude</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                                </AtuacaoCheckBox>                                
-                                <AtuacaoCheckBox>  
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={sustentavel}
-                                            onValueChange={setSustentavel}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Sustentavel</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                                    <AtuacaoCheckBoxInd>                       
-                                        <CheckBox
-                                            value={religioso}
-                                            onValueChange={setReligioso}
-                                            style={styles.checkbox}
-                                            />
-                                        <AtuacaoCheckBoxText>Religioso</AtuacaoCheckBoxText>   
-                                    </AtuacaoCheckBoxInd> 
-                             </AtuacaoCheckBox> 
-                            </AtuacaoCheck>
-                        </AtuacaoCheckBoxView>
-
-
-
-
-
-                        {loading && true ?
-                            <LoadingIcon size="large" color="#FFFFFF" />
-                        :
-                            <CustomButton onPress={handleSignClick}>
-                                <CustomButtonText>PROXIMA</CustomButtonText>
-                            </CustomButton> 
-                        }
-                    </InputArea>
-                </ContainerPerfil>
+    const HandleLocationFinder = () => {
+        console.log('localização');
+        setModalVisible(true);
+    }
+    const onLocationSelecte = async ( data, details ) => {
+        let cid = '';
+        let est = '';
+        setDescricao(data.description)
+        await details.address_components.forEach((item)=>{
+            if(item.types[0] == 'administrative_area_level_2'){
+                setCidade(item.long_name);
+                cid = item.long_name;
+            }else{if(item.types[0] == 'administrative_area_level_1'){
+                    setUf(item.short_name);
+                    est = item.short_name;
+                }else{if(item.types[0] == 'country'){
+                        setPais(item.long_name);
+                    }   
+                }   
             }
-        </ScrollView>
+        });
+        setCoords(details.geometry.location);  
+        setModalVisible(false);
+    }
 
+
+    return (  
+        <Container>
+            <Modal
+                visible = {modalVisible}
+                animationType = "slide"                     
+            >
+            <LocationArea>
+                <LocationInput 
+                    onPress={ onLocationSelecte } 
+                    value={descricao} 
+                    onChangeText={t=>setDescricao(t)}     
+                />
+            </LocationArea>
+            </Modal>      
+            <ScrollView>
+                {loading && true ?
+                    <LoadingIcon size="large" color="#FFFFFF" />
+                :
+                    <ContainerPerfil>
+                        <BackButtom onPress={hendleBackButtom}>
+                            <BackIcon width="44" height="44" fill="#000000" />
+                        </BackButtom>
+                        <InputArea>
+                            <Titulo>Cadastro de Guia</Titulo>
+                            <CadInput 
+                                IconSvg={PersonIcom} 
+                                placeholder="Nome"
+                                value={nomeField}
+                                onChangeText={t=>setNomeField(t)}
+                            />
+                            <CadInput 
+                                IconSvg={CameraIcon} 
+                                placeholder="CadasTur / UF"
+                                value={oabField}
+                                onChangeText={t=>setOabField(t)}
+                            />
+                            <CadInput 
+                                IconSvg={CasaIcon} 
+                                placeholder="Logradoro"
+                                value={logradoroField}
+                                onChangeText={t=>setLogradoroField(t)}
+                            />
+                            <CadInput 
+                                IconSvg={CasaIcon} 
+                                placeholder="Numero"
+                                value={numeroField}
+                                onChangeText={t=>setNumeroField(t)}
+                            />
+                            <CadInput 
+                                IconSvg={CasaIcon} 
+                                placeholder="Complemento & Bairro"
+                                value={complementoField}
+                                onChangeText={t=>setComplementoField(t)}
+                            />
+
+
+                            <InputAreaLoc onPress={HandleLocationFinder}>
+                                <WyLocationIcon width="25" height="25" fill="#FF9B29" />
+                                <HeaderTitleLoc>{descricao}</HeaderTitleLoc>                        
+                            </InputAreaLoc> 
+
+
+                            <CadInput 
+                                IconSvg={FacebookIcon} 
+                                placeholder="Informe o link de seu Facebook"
+                                value={faceField}
+                                onChangeText={t=>setFaceField(t)}
+                            />
+                            <CadInput 
+                                IconSvg={InstagramIcon} 
+                                placeholder="Informe o link de seu Instagran"
+                                value={instaField}
+                                onChangeText={t=>setInstaField(t)}
+                            />
+                            <CadInput 
+                                IconSvg={LinkedinIcon} 
+                                placeholder="Informe o link de seu Linkedin"
+                                value={linkedinField}
+                                onChangeText={t=>setLinkedinField(t)}
+                            />
+                            <CadInput 
+                                IconSvg={CelularIcom} 
+                                placeholder="Whatsapp"
+                                value={maskTele(celularField)}
+                                onChangeText={t=>setCelularField(t)}
+                            />
+                            <CadInput 
+                                IconSvg={TelefoneIcon} 
+                                placeholder="Telefone Fixo"
+                                value={maskTele(telefoneField)}
+                                onChangeText={t=>setTelefoneField(t)}
+                            />
+                            <CadInput 
+                                IconSvg={SiteIcon} 
+                                placeholder="Site"
+                                value={siteField}
+                                onChangeText={t=>setSiteField(t)}
+                            />
+                            <CadInput 
+                                IconSvg={EmailIcon} 
+                                placeholder="Digite seu e-mail"
+                                value={emailField}
+                                onChangeText={t=>setEmailField(t)}
+                            />
+                            <CadInput 
+                                IconSvg={OlhoIcon} 
+                                placeholder="Observação"
+                                value={obsField}
+                                onChangeText={t=>setObsField(t)}
+                            />
+                            <AtuacaoCheckBoxView>
+                                <AtuacaoCheckBoxTextTituloVire>
+                                    <AtuacaoCheckBoxTextTitulo>Tipo de Turismo</AtuacaoCheckBoxTextTitulo>
+                                </AtuacaoCheckBoxTextTituloVire>
+                                <AtuacaoCheck>
+                                    <AtuacaoCheckBox>
+                                    <AtuacaoCheckBoxInd>
+                                            <CheckBox
+                                                value={agroturismo}
+                                                onValueChange={setAgroturismo}
+                                                style={styles.checkbox}
+                                            />
+                                            <AtuacaoCheckBoxText>Agroturismo</AtuacaoCheckBoxText>
+                                        </AtuacaoCheckBoxInd>
+                                        <AtuacaoCheckBoxInd>
+                                            <CheckBox
+                                                value={aventura}
+                                                onValueChange={setAventura}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Aventura</AtuacaoCheckBoxText> 
+                                        </AtuacaoCheckBoxInd>
+                                    </AtuacaoCheckBox> 
+                                    <AtuacaoCheckBox>  
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={consumo}
+                                                onValueChange={setConsumo}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Consumo</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                        <AtuacaoCheckBoxInd>                    
+                                            <CheckBox
+                                                value={cultural}
+                                                onValueChange={setCultural}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Cultural</AtuacaoCheckBoxText>
+                                        </AtuacaoCheckBoxInd>                       
+                                    </AtuacaoCheckBox>
+                                    <AtuacaoCheckBox>  
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={ecoturismo}
+                                                onValueChange={setEcoturismo}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Ecoturismo</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={esporte}
+                                                onValueChange={setEsporte}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Esporte</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                    </AtuacaoCheckBox>
+
+                                    <AtuacaoCheckBox>  
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={eventos}
+                                                onValueChange={setEventos}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Eventos</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={gastronomico}
+                                                onValueChange={setGastronomico}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Gastronomico</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                    </AtuacaoCheckBox>
+                                    <AtuacaoCheckBox>  
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={incentivo}
+                                                onValueChange={setIncentivo}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Incentivo</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={massa}
+                                                onValueChange={setMassa}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Massa</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                    </AtuacaoCheckBox>
+                                    <AtuacaoCheckBox>  
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={nautico}
+                                                onValueChange={setNautico}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Nautico</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={negocios}
+                                                onValueChange={setNegocios}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Negocios</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                    </AtuacaoCheckBox>
+                                    <AtuacaoCheckBox>  
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={pedagogico}
+                                                onValueChange={setPedagogico}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Pedagogico</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={saude}
+                                                onValueChange={setSaude}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Saude</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                    </AtuacaoCheckBox>                                
+                                    <AtuacaoCheckBox>  
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={sustentavel}
+                                                onValueChange={setSustentavel}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Sustentavel</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                        <AtuacaoCheckBoxInd>                       
+                                            <CheckBox
+                                                value={religioso}
+                                                onValueChange={setReligioso}
+                                                style={styles.checkbox}
+                                                />
+                                            <AtuacaoCheckBoxText>Religioso</AtuacaoCheckBoxText>   
+                                        </AtuacaoCheckBoxInd> 
+                                </AtuacaoCheckBox> 
+                                </AtuacaoCheck>
+                            </AtuacaoCheckBoxView>
+
+
+
+
+
+                            {loading && true ?
+                                <LoadingIcon size="large" color="#FFFFFF" />
+                            :
+                                <CustomButton onPress={handleSignClick}>
+                                    <CustomButtonText>PROXIMA</CustomButtonText>
+                                </CustomButton> 
+                            }
+                        </InputArea>
+                    </ContainerPerfil>
+                }
+            </ScrollView>
+        </Container>
     );
 }
 

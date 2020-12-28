@@ -3,6 +3,7 @@ import { Platform, RefreshControl} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { request, PERMISSIONS } from 'react-native-permissions';
 import Geolocation from 'react-native-geolocation-service';
+import Geocoder from 'react-native-geocoder-reborn';
 import { 
     ContainerTab,
     Scroller,
@@ -25,8 +26,7 @@ import WyLocationIcon from '../../assets/my_location.svg';
 import LocationInput from '../../components/LocationInput';
 export default () => {
     const navigation = useNavigation();
-    const [ locationText, setLocationText ] =useState('');
-    const [ coords, setCoords ] =useState([]);
+    const [ coords, setCoords ] =useState({});
     const [ loading, setLoading ] = useState(false);
     const [ list, setList ] = useState([]);
     const [ refreshing, setRefreshing ] = useState(false);
@@ -34,7 +34,7 @@ export default () => {
     const [ cidade, setCidade ] = useState('');
     const [ uf, setUf ] = useState('');
     const [ pais, setPais ] = useState('');
-  //  const geocoder  = new google.maps.Geocoder();
+    const [ descricao, setDescricao ] =useState('');
 
 
     useEffect(()=>{
@@ -52,26 +52,43 @@ export default () => {
         );
         if(result == 'granted') {
             setLoading(true);
-            setLocationText('');
             setList([]);
-            Geolocation.getCurrentPosition((info)=>{
-                setCoords(info.coords);
-//                console.log(info.coords);
-
-
-                getAdvogados();
-            },
-            error => {
-                alert.log(error);
-            },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-            )
+            await pegacoordenadas();            
         }else{
             console.log('Erro apermission');
-            getAdvogados();
-        }
+            getAdvogados('', '');
+        }        
+
     }
-    const getAdvogados = async () => {
+    const pegacoordenadas = async () => {
+        Geolocation.getCurrentPosition((info)=>{
+                setCoords({ lat: info.coords.latitude, lng: info.coords.longitude }),
+                pegaNomeCidade({ lat: info.coords.latitude, lng: info.coords.longitude })
+            },
+            error => {
+                alert(error);
+            },
+            { enableHighAccuracy: true, timeout: 1000, maximumAge: 10000 }
+        )
+    }
+    
+    const pegaNomeCidade = async (coord) => {
+        const lat = coord.lat;
+        const lng = coord.lng;
+        Geocoder.geocodePosition({ lat, lng })
+            .then(res => {
+                setCidade(res[0].subAdminArea);
+                setUf(res[0].adminArea);
+                setPais(res[0].country);
+                setDescricao(res[0].subAdminArea+',', res[0].adminArea, res[0].country)
+                getAdvogados(res[0].subAdminArea, res[0].adminArea );
+            })
+            .catch((error)=>{ 
+                alert("Cidade não encontrada!");
+            });
+    }
+
+    const getAdvogados = async (cid, estado) => {
         setLoading(true);
         setList([]);
 
@@ -81,7 +98,8 @@ export default () => {
             lat = coords.latitude;
             lng = coords.longitude;
         }
-        await Api.getAdvogados(lat, lng, locationText).then((snapshot)=>{
+        console.log(cid, estado)
+        await Api.getAdvogados(lat, lng, cid, estado).then((snapshot)=>{
             let addLista = list;
             addLista = [];
             snapshot.forEach((childItem)=>{
@@ -124,22 +142,27 @@ export default () => {
     }
     const onRefresh = () => {
         setRefreshing(false)
-        getAdvogados();
+        getAdvogados(cidade, uf);
     }
     const onLocationSelected = async ( data, details ) => {
+        let cid = '';
+        let est = '';
+        setDescricao(data.description)
         await details.address_components.forEach((item)=>{
             if(item.types[0] == 'administrative_area_level_2'){
-                setCidade(item.long_name)
+                setCidade(item.long_name);
+                cid = item.long_name;
             }else{if(item.types[0] == 'administrative_area_level_1'){
-                    setUf(item.short_name)
+                    setUf(item.short_name);
+                    est = item.short_name;
                 }else{if(item.types[0] == 'country'){
-                        setPais(item.long_name)
+                        setPais(item.long_name);
                     }   
                 }   
             }
         });
         setCoords(details.geometry.location);
-        getAdvogados();
+        getAdvogados(cid, est);
     }
 
     return (
@@ -151,7 +174,11 @@ export default () => {
                     </SearchButton>
             </HeaderArea>
             <LocationArea>
-                <LocationInput onPress={ onLocationSelected }    />
+                <LocationInput 
+                    onPress={ onLocationSelected } 
+                    value={descricao} 
+                    onChangeText={t=>setDescricao(t)}     
+                />
                 <LocationFinder onPress={HandleLocationFinder}>
                     <WyLocationIcon width="30" height="30" fill="#FF9B29" />
                 </LocationFinder>

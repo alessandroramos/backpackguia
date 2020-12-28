@@ -596,5 +596,24 @@ export const Startext = styled.Text`
     margin-left: 5px;
     color: #000;
 `;
+export const InputAreaLoc = styled.TouchableOpacity`
+    width: 100%;
+    height: 40px;
+    background-color: #ffffff;
+    flex-direction: row;
+    border-radius: 20px;
+    padding-left: 5px;
+    align-items: center;
+    margin-bottom: 5px;
+    border: 1px solid #3D4140;
+`;
+export const HeaderTitleLoc = styled.Text`
+    width: 80%;
+    font-size: 16px;
+    margin-left: 10px;
+    color: #000000;
+`;
+
+
 
 

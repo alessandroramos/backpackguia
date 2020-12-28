@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
-const LocationInput = ( { onPress } ) => {    
+const LocationInput = ( { onPress, value, onChangeText } ) => {  
     return (
         <GooglePlacesAutocomplete
             placeholder='Para onde você deseja o guia!'
             placeholderTextColor= "#fff"
-        
 
             onPress = { onPress }
 
@@ -21,7 +20,9 @@ const LocationInput = ( { onPress } ) => {
             }}
             textInputProps = {{
                 autoCapitalize: "none",
-                autoCorrect: false
+                autoCorrect: false,
+                value: value,
+                onChangeText:onChangeText
             }}
             fetchDetails
             enablePoweredByContainer={false}
