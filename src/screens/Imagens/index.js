@@ -121,10 +121,14 @@ export default () => {
     const hendleBackButtom = () => {
         navigation.goBack();
     };
-
     const handleSignClick = async () => {
         setModalGaleria(true)
-    }
+    };
+    const handleConcluirClick = () => {
+        navigation.reset({
+            routes:[{name: 'MainTab'}]
+        })
+    };
     const handleGaleriaClick = async () => {
         setModalGaleria(false)        
         setLoading(true)
@@ -199,6 +203,9 @@ export default () => {
                         </AtuacaoCheckBoxView>
                         <CustomButton onPress={handleSignClick}>
                             <CustomButtonText>Carrega Imagem</CustomButtonText>
+                        </CustomButton> 
+                        <CustomButton onPress={handleConcluirClick}>
+                            <CustomButtonText>Concluir</CustomButtonText>
                         </CustomButton> 
                     </InputArea>
                 }

@@ -24,6 +24,9 @@ export const UserName = styled.Text`
     font-size: 17px;
     font-weight: bold;
 `;
+export const UserCidade = styled.Text`
+    font-size: 17px;
+`;
 export const SeeProfileButton = styled.View`
     width: 85px;
     height: 26px;
@@ -52,6 +55,7 @@ export default ({data}) => {
             <Avatar source={{uri: data.avatar}} />
             <InfoArea>
                 <UserName>{data.nome}</UserName>
+                <UserCidade>{data.cidade}</UserCidade>
                 <Stars stars={data.estrela} showNuber={true} />
                 <SeeProfileButton>
                     <SeeProfileButtonText>Ver Mais...</SeeProfileButtonText>

@@ -27,7 +27,6 @@ export default () => {
                     });
                     navigation.reset({
                         routes:[{name: 'MainTab'}]
-
                     })
                 }else{
                     Api.logout();

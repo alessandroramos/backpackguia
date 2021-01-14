@@ -16,8 +16,8 @@ import {
     CustomButtonText,
     StarArea,
     StarView,
-    Startext,
-    StarButton   
+    HeaderAreaFeke,
+    HeaderTitleFeke
 } from '../Styles/styles'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import AsyncStorage from  '@react-native-community/async-storage'
@@ -155,9 +155,6 @@ export default () => {
 
     return (
         <ContainerPerfil>
-            <HeaderAreaFeke>
-                <HeaderTitleFeke />
-            </HeaderAreaFeke>
             {loading && true ?
                 <LoadingIcon size="large" color="#000000" />
             :

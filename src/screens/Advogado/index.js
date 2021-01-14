@@ -28,20 +28,21 @@ import CheckBox from '@react-native-community/checkbox';
 import EmailIcon from '../../assets/email.svg';
 import PersonIcom from '../../assets/person.svg';
 import CelularIcom from '../../assets/whatsappP.svg';
-import CadInput from '../../components/CadInput'
-import BackIcon from '../../assets/back.svg'
-import CameraIcon from '../../assets/camera.svg'
-import CasaIcon from '../../assets/placeholder.svg'
-import SiteIcon from '../../assets/site.svg'
-import TelefoneIcon from '../../assets/telefone.svg'
-import OlhoIcon from '../../assets/olho.svg'
-import FacebookIcon from '../../assets/facebookP.svg'
-import InstagramIcon from '../../assets/instagramP.svg'
-import LinkedinIcon from '../../assets/linkedinP.svg'
+import CadInput from '../../components/CadInput';
+import BackIcon from '../../assets/back.svg';
+import CameraIcon from '../../assets/camera.svg';
+import CasaIcon from '../../assets/placeholder.svg';
+import SiteIcon from '../../assets/site.svg';
+import TelefoneIcon from '../../assets/telefone.svg';
+import OlhoIcon from '../../assets/olho.svg';
+import FacebookIcon from '../../assets/facebookP.svg';
+import InstagramIcon from '../../assets/instagramP.svg';
+import LinkedinIcon from '../../assets/linkedinP.svg';
 import WyLocationIcon from '../../assets/my_location.svg';
-import Api from '../../Api'
+import OabIcon from "../../assets/oab.svg";
+import Api from '../../Api';
 import LocationInput from '../../components/LocationInput';
-import SignInput from '../../components/SignInput'
+import SignInput from '../../components/SignInput';
 import LockIcom from '../../assets/lock.svg';
 
 
@@ -52,6 +53,7 @@ export default () => {
     const [ loading, setLoading ] = useState(false);
     const [ nomeField, setNomeField ] = useState('');
     const [ oabField, setOabField ] = useState('');
+    const [ cpfField, setCpfField ] = useState('');
     const [ logradoroField, setLogradoroField ] = useState('');
     const [ numeroField, setNumeroField ] = useState('');
     const [ complementoField, setComplementoField ] = useState('');
@@ -125,6 +127,7 @@ export default () => {
             if(snapshot.val()){
                 setNomeField(snapshot.val().nome),
                 setOabField(snapshot.val().oab),
+                setCpfField(snapshot.val().cpf),
                 setLogradoroField(snapshot.val().logradoro),
                 setNumeroField(snapshot.val().numero),
                 setComplementoField(snapshot.val().complemento),
@@ -280,7 +283,7 @@ export default () => {
             if(nomeField){ 
                 if(oabField) { 
                     if(celularField){
-                        await Api.setAdvogados( uid, nomeField, oabField, logradoroField, numeroField, complementoField,
+                        await Api.setAdvogados( uid, nomeField, oabField, cpfField, logradoroField, numeroField, complementoField,
                             cidade, uf, pais, descricao, coords, telefoneField, celularField, emailField, siteField, avatar, 
                             obsField, situacao, aAtuacao, foto, depoimento, faceField, instaField, linkedinField, estrelasField)
                             .then(function() {
@@ -396,9 +399,15 @@ export default () => {
                             />
                             <CadInput 
                                 IconSvg={CameraIcon} 
-                                placeholder="CadasTur / UF"
+                                placeholder="Informe Nº Entidade Reguladora ou  RG"
                                 value={oabField}
                                 onChangeText={t=>setOabField(t)}
+                            />
+                            <CadInput 
+                                IconSvg={OabIcon} 
+                                placeholder="Informe seu CPF ou CNPJ"
+                                value={cpfField}
+                                onChangeText={t=>setCpfField(t)}
                             />
                             <CadInput 
                                 IconSvg={CasaIcon} 

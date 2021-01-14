@@ -100,13 +100,14 @@ class Api{
             });
     }
 
-    setAdvogados (uid, nome, oab, logradoro, numero, complemento, cidade, uf, pais, descricao, coords,telefone, 
+    setAdvogados (uid, nome, oab, cpf, logradoro, numero, complemento, cidade, uf, pais, descricao, coords,telefone, 
                     celular, email, site, avatar, obs, situacao, atuacao, foto, depoimento, 
                     face, insta, linkedin, estrelas)  {
             console.log("Api.setAdvogados")
             return firebase.database().ref('advogados').child(uid).set({
             nome:nome,
             oab: oab, 
+            cpf: cpf || "",
             logradoro: logradoro || '', 
             numero: numero || '', 
             complemento: complemento || '', 

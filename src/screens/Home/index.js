@@ -45,11 +45,13 @@ export default () => {
         setCoords(null);
         setLoading(true);
         let result = await request(
-            Platform.os === 'ios' ?
-            PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
+            Platform.OS === 'ios' ?
+                PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
             :
-            PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION
+                PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION
         );
+
+        console.log(PERMISSIONS.IOS)
         if(result == 'granted') {
             setLoading(true);
             setList([]);
@@ -129,7 +131,8 @@ export default () => {
                     key: childItem.key,
                     nome: childItem.val().nome,
                     estrela: estrela,
-                    avatar: childItem.val().avatar
+                    avatar: childItem.val().avatar,
+                    cidade: childItem.val().descricao
                 });
             })
             setList(addLista);
