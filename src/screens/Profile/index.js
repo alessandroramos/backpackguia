@@ -1,15 +1,13 @@
 import React, { useState, useEffect} from 'react';
-import { Modal, Switch } from 'react-native';
+import { Modal, Linking } from 'react-native';
+import Swiper from 'react-native-swiper';
 import { 
     ContainerTab,
     LoadingIcon,
     InputArea,
     BackButtom,
-    Titulo,
     InputAreaAvata,
     UserAvatar,
-    CustomButton,
-    CustomButtonText,
     InputAreaSenha,
     CustomButtonProf,
     CustomButtonTextProf,
@@ -17,39 +15,84 @@ import {
     CustomButtonAlterAvata,
     CustomButtonProfSenha,
     AreaButtoms,
-    InputAreaSwitch,
-    InputAreaSwitchText,
     InputAreaCamera,
-    CustomButtonCamaGale
+    CustomButtonCamaGale,
+    ScrollPerfil,
+    FekeSwiper,
+    PageBody,
+    InfoPerfil,
+    UserInfoContato,
+    AtuacaoArea,
+    FekeArea,
+    DeporimentosArea,
+    SwiperDot,
+    SwipeDotActive,
+    SwipeItem,
+    SwipeImage,
+    UserInfo,
+    UserInfoNome,
+    InputAreaPerfil,
+    UserInfoLogra,
+    InfoContato,
+    UserInfoObs,
+    AtuacaoTitulo,
+    AtuacaoItem,
+    AtuacaoTituloArea,
+    AtuacaoItemText,
+    AtuacaoItems,
+    DeporimentoItem,
+    DeporimentoInfo,
+    DeporimentoItemNome,
+    DeporimentoItemTex,
+    DepoimentoTitulo,
+    UserInfoAreaRedeSocial,
+    CustomButtonRedeSocial,
+    UserInfoDepoimento,
+    CustomButtonDepoimento,
+    UserInfoAreaDepoimento,
+    InputAreaAvataPerfil
 } from '../Styles/styles';
 import Api from '../../Api'
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import BackIcon from '../../assets/back.svg'
 import SignInput from '../../components/SignInput'
 import LockIcom from '../../assets/lock.svg';
-import PersonIcom from '../../assets/person.svg';
-import CelularIcom from '../../assets/celular.svg';
 import IconSvgAvatar from '../../assets/camera.svg'
 import AsyncStorage from  '@react-native-community/async-storage';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import RNFFetchBlob from 'react-native-fetch-blob'
+import Stars from  '../../components/Stars';
+import NavPrevIcon from '../../assets/nav_prev.svg'
+import NavNextIcon from '../../assets/nav_next.svg'
+import WhatsappIcon from '../../assets/whatsapp.svg'
+import LinkedinIcon from '../../assets/linkedin.svg'
+import FaceIcon from '../../assets/face.svg'
+import InstaIcon from '../../assets/insta.svg'
+import TelefoneIcon from '../../assets/telefone.svg'
+import EmailIcon from '../../assets/email.svg';
+import SiteIcon from '../../assets/site.svg'
+import DepoimentoIcon from '../../assets/depoimento.svg'
 window.XMLHttpRequest = RNFFetchBlob.polyfill.XMLHttpRequest;
 window.Blob = RNFFetchBlob.polyfill.Blob;
+
 
 export default () => {
     const [ modalVisible, setModalVisible ] = useState(false);
     const [ refr, setRefr ] = useState(false);
     const navigation = useNavigation();
-    const [ loading, setLoading ] = useState(false);
-    const [ nomeField, setNomeField ] = useState('');
-    const [ emailField, setEmailField ] = useState('');
-    const [ telefoneField, setTelefoneField ] = useState('');
-    const [ advogado, setAdvogado ] = useState(false);
-    const [ avatar, setAvatar ] = useState('https://firebasestorage.googleapis.com/v0/b/backpack-f5a42.appspot.com/o/logo%2Fpessoa.png');
+    const [ loading, setLoading ] = useState(true);
     const [ passwordField, setPasswordField ] = useState('');
     const [ passwordFieldNova, setPasswordFieldNova ] = useState('');
     const [ passwordFieldConfirma, setPasswordFieldConfirma ] = useState('');
     const [ modalGaleria, setModalGaleria ] = useState(false);
+
+    const route = useRoute();
+    const [ userInfo, setUseInfo ] = useState({ });
+    const [ estrela, setEstrela ] = useState()
+    const [ key, setKey ] = useState('');
+    const [ atuacao, setAtuacao ] = useState([]);
+    const [ depoimento, setDepoimento ] = useState([]);
+    const [ foto, setFoto ] = useState([]);    
     const options = {
         title: 'Selecionar Imagem!',
         storageOptions: {
@@ -59,29 +102,74 @@ export default () => {
         },
     };
     useEffect(()=>{
-        getUsuario();
-    }, [refr]);
+        getPerfil();        
+    }, [])
 
-    useEffect(()=>{
-        handleClick();
-    }, [advogado]);
-
-    const getUsuario = async () =>{
+    const getPerfil = async () => {
         setLoading(true);
         const token = await AsyncStorage.getItem('tokenUser');
         const user = JSON.parse(token);
-        const uid = user.uid;
-        await Api.getUsuario(uid).then((snapshot)=>{
-            setNomeField(snapshot.val().nome);
-            setEmailField(snapshot.val().mail);
-            setTelefoneField(snapshot.val().telefone);
-            setAdvogado(snapshot.val().advogado);
-            setAvatar(snapshot.val().avatar);
-        }).catch((error)=>{ 
-            alert(error);
+        setKey(user.uid);
+        console.log(user.uid)        
+        await Api.getAdvogado(user.uid).then((snapshot)=>{
+            setUseInfo(snapshot.val())
+            setAtuacao(snapshot.val().atuacao)
+            setDepoimento(snapshot.val().depoimento)
+
+            let cont =0;
+            let est = 0;
+            let estrela = 0;
+            if(snapshot.val().depoimento){
+                snapshot.val().depoimento.forEach((dep)=>{
+                    cont ++
+                    est = est+dep.estrela
+                });
+                estrela = (Math.trunc(est/cont));
+                let resto = ((est%cont)/cont)
+                if(resto < 0.25){
+                    resto = 0;
+                }else{
+                    if(resto >0.24 && resto < 0.75 ){
+                        resto = 0.5;
+                    }else{
+                        resto = 0;
+                        estrela ++;
+                    }
+                }
+                estrela = estrela + resto;
+                setEstrela(estrela);
+            }                
+            let addLista = [];
+            let addLista1 = [];
+            snapshot.val().foto.forEach((childItem)=>{
+                if(childItem.url_imagem){
+                    addLista.push({url_imagem:childItem.url_imagem});
+                }else{
+                    addLista1.push({url_imagem:childItem});
+                }
+            })
+
+            if(addLista.length > 0){
+                setFoto(addLista);
+            }else{
+                setFoto(addLista1);
+            }
+            return
+        })
+        .then(()=>{
+            console.log('fim') 
+        })
+        .catch((error)=>{ 
+            alert("Nenhum Advogado encontrado!");
         });
         setLoading(false);
     }
+
+
+
+
+
+
 
     const handleLogoutClick = ()  => {
         Api.logout();
@@ -92,50 +180,6 @@ export default () => {
     const handleAdvogadoClick = ()  => {
         navigation.navigate('Advogado'); 
     }
-    const hendleBackButtom = () => {
-        navigation.goBack();
-    };
-    const maskTele = (telefone) => {
-        if( telefone != null ){
-            if(telefone == null){
-                telefone = ''
-            }
-            if (telefone.length ==1){
-                telefone = '('+telefone 
-            }
-            if (telefone.length ==3){
-                telefone = telefone+') ' 
-            }
-            if (telefone.length ==9){
-                telefone = telefone+'-' 
-            }
-            if (telefone.length ==15 && telefone.substring(4,5)==' '){
-                telefone = telefone.substring (0,4)+ telefone.substring (5,9)+ telefone.substring(10,11)+'-'+ telefone.substring (11,16) 
-            }
-            if (telefone.length > 14){
-                telefone = telefone.substring (0,14)
-            }
-        }
-        return telefone
-    }
-
-    const handleClick = async () => {
-    
-        setLoading(true);
-        if(telefoneField.length > 0 && nomeField.length > 0)
-        {
-            const token = await AsyncStorage.getItem('tokenUser');
-            const user = JSON.parse(token);
-            const uid = user.uid;
-            await Api.setUserAtu(telefoneField, nomeField, advogado, uid)
-        }
-        setLoading(false);
-
-    }
-    const toggleSwitch =  () => {
-        setAdvogado(previousState => !previousState)
-    }
-
 
     const pegarImagem = async (galeria) => {
         const token = await AsyncStorage.getItem('tokenUser');
@@ -179,7 +223,7 @@ export default () => {
             .then((blob) =>{
                 uploadBlob = blob;
                 Api.setAvatar(nomeImage, blob, mime, uid).then(function() {
-                    getUsuario();
+                    getPerfil();
                 })
             })
         }
@@ -189,7 +233,7 @@ export default () => {
     }
     const handleSenhaSalvarClick = async () => {
         if(passwordFieldNova.length > 5 && passwordFieldNova == passwordFieldConfirma) {
-            Api.login(emailField, passwordField)
+            Api.login(userInfo.email, passwordField)
             .then((snapshot)=>{
                 Api.setAlterarSenha(passwordFieldNova)
                 .then(function() {
@@ -232,12 +276,65 @@ export default () => {
     const handleLogoutClickCancelar = () => {
         setModalVisible(false);
     }
+
+
+
+
+    const hendleBackButtom = () => {
+        navigation.goBack();
+    };
+    const hendleBackButtomFace = () =>{
+        Linking.canOpenURL("fb://facewebmodal/f?"+userInfo.face).then (supported => { 
+            if (supported) { 
+              return Linking.openURL ("fb://facewebmodal/f?"+userInfo.face); 
+            } else { 
+              return Linking.openURL (userInfo.face); 
+            } 
+          }) 
+        
+    }
+    const hendleBackButtomInsta = () =>{
+        Linking.openURL (userInfo.insta); 
+    }
+
+    const hendleBackButtomWatsapp = () => {
+        const what = userInfo.celular.replace(/([^\d])+/gim, '');
+        Linking.canOpenURL ("whatsapp: // send? Text = oi") .then (supported => { 
+            if (supported) { 
+              return Linking.openURL ("whatsapp: // send? phone = 55"+what+" & text = Oi"); 
+            } else { 
+              return Linking.openURL ("https://api.whatsapp.com/send?phone=55"+what+"&text=Oi"); 
+            } 
+        }) 
+    }
+    const hendleBackButtomLinkedin = () => {
+        Linking.openURL (userInfo.linkedin); 
+    }
+    const hendleBackButtomTelefone = () => {
+        Linking.openURL('tel:'+userInfo.telefone);
+    }
+    const hendleBackButtomMail = () => {
+        Linking.openURL('mailto:'+userInfo.email+'?subject=Contado Back Pack Guia=body');
+    }
+    const hendleBackButtomSite = () => {
+        Linking.canOpenURL (userInfo.site) .then (supported => { 
+            if (supported) { 
+                Linking.openURL (userInfo.site); 
+            }else{
+                Linking.openURL ("https://"+userInfo.site);
+            }
+        })
+    }
+    const hendleBackButtomDepoimento = () => {
+        navigation.navigate('Appointments', {key: key}); 
+    }
+
     return (
         <ContainerTab>
             {loading && true ?
                 <LoadingIcon size="large" color="#000000" />
             :
-                <InputArea>
+                <InputAreaPerfil>
                     <Modal
                         visible = {modalVisible}
                         animationType = "slide"                     
@@ -292,69 +389,184 @@ export default () => {
                             </InputAreaCamera>
                         </InputArea>
                     </Modal>
-                    <BackButtom onPress={hendleBackButtom}>
-                        <BackIcon width="44" height="44" fill="#000000" />
-                    </BackButtom>
-                    <Titulo>Cadastro de Usuario</Titulo>
-                    <InputAreaAvata>
-                        <UserAvatar source={{uri:avatar}} />
-                        <UserAvatarAlter>
-                            <CustomButtonAlterAvata onPress={handleAlterAvataClick}>
-                                <IconSvgAvatar width="20" height="20" fill="#000" />
-                            </CustomButtonAlterAvata>
-                        </UserAvatarAlter>
-                    </InputAreaAvata>
-                    <SignInput 
-                        IconSvg={PersonIcom} 
-                        placeholder="Informe seu nome"
-                        value={nomeField}
-                        onChangeText={t=>setNomeField(t)}
-                    />
-                    <SignInput 
-                        IconSvg={CelularIcom} 
-                        placeholder="Informe seu Celular"
-                        value={maskTele(telefoneField)}
-                        onChangeText={t=>setTelefoneField(t)}
-                        mask="99/99/9999"
-                    />
-                    <InputAreaSwitch>
-                        <InputAreaSwitchText>Você Guia Turistico?</InputAreaSwitchText>
-                        <Switch
-                            trackColor={{ false: "#767577", true: "#FF9B29" }}
-                            thumbColor={advogado ? "#f4f3f4" : "#3D4140" }
-                            ios_backgroundColor="#3e3e3e"
-                            onValueChange={toggleSwitch}
-                            value={advogado}
-                        />
-                    </InputAreaSwitch>
-                    <CustomButton onPress={handleClick}>
-                        <CustomButtonText>Atualizar</CustomButtonText>
-                    </CustomButton> 
-                    <AreaButtoms>
+                    <ScrollPerfil>
+                        <BackButtom onPress={hendleBackButtom}>
+                            <BackIcon width="44" height="44" fill="#000000" />
+                        </BackButtom>
+                        {foto && foto.length > 0 ?
+                            <Swiper
+                                style={{height: 240}}
+                                dot={<SwiperDot />}
+                                activeDot={< SwipeDotActive/>}
+                                paginationStyle={{top:15, right:15, bottom: null, left: null}}
+                                autoplay={true}
+                            >
+                                {foto.map((item, k)=>(
+                                    <SwipeItem key={k} data={item} >
+                                        {item.url_imagem &&
+                                            <SwipeImage source={{uri:item.url_imagem}} />
+                                        }
+                                    </SwipeItem>
+                                ))}
+                            </Swiper>
+                            :
+                            <FekeSwiper></FekeSwiper>
+                        }
+                        <PageBody>
+                            <InfoPerfil>
+                                <InputAreaAvataPerfil>
+                                    <UserAvatar source={{uri:userInfo.avatar}} />
+                                    <UserAvatarAlter>
+                                        <CustomButtonAlterAvata onPress={handleAlterAvataClick}>
+                                            <IconSvgAvatar width="20" height="20" fill="#000" />
+                                        </CustomButtonAlterAvata>
+                                    </UserAvatarAlter>
+                                 </InputAreaAvataPerfil>
+                                <UserInfo>
+                                    <UserInfoNome>{userInfo.nome}</UserInfoNome>
+                                    <UserInfoLogra>{"CADASTUR: "+userInfo.oab}</UserInfoLogra>
+                                    <Stars stars={estrela} showNuber={true} />
+                                </UserInfo>
 
-                        <InputAreaSenha>
-                            <CustomButtonProf onPress={handleSenhaClick}>
-                                <CustomButtonTextProf>Altera Senha</CustomButtonTextProf>
-                            </CustomButtonProf>
-                            <CustomButtonProf onPress={handleLogoutClick} >
-                                <CustomButtonTextProf>Desconectar</CustomButtonTextProf>
-                            </CustomButtonProf>                
-                        </InputAreaSenha>
-                        {advogado &&
+                            </InfoPerfil>
+                            <InfoContato>   
+                                <UserInfoContato>
+                                    <UserInfoLogra>{userInfo.logradoro+' '+userInfo.numero}</UserInfoLogra>
+                                    {userInfo.complemento ?
+                                        <UserInfoLogra>{userInfo.complemento+"   "+userInfo.cidade+'/'+userInfo.uf}</UserInfoLogra>
+                                        :
+                                        <UserInfoLogra>{userInfo.cidade+'/'+userInfo.uf}</UserInfoLogra>
+                                    }
+                                    {userInfo.linkedin ?
+                                        <UserInfoAreaRedeSocial>
+                                            <CustomButtonRedeSocial  onPress={hendleBackButtomLinkedin}>
+                                                <LinkedinIcon width="20" height="20" fill="#000000" />
+                                                <UserInfoLogra>{userInfo.linkedin}</UserInfoLogra>
+                                            </CustomButtonRedeSocial>
+                                        </UserInfoAreaRedeSocial>
+                                    :
+                                        <FekeArea/>
+                                    }
+                                    {userInfo.face ?
+                                        <UserInfoAreaRedeSocial>
+                                            <CustomButtonRedeSocial  onPress={hendleBackButtomFace}>
+                                                <FaceIcon width="20" height="20" fill="#000000" />
+                                                <UserInfoLogra>{userInfo.face}</UserInfoLogra>
+                                            </CustomButtonRedeSocial>
+                                        </UserInfoAreaRedeSocial>
+                                    :
+                                        <FekeArea/>
+                                    }
+                                    {userInfo.insta ?
+                                        <UserInfoAreaRedeSocial>
+                                            <CustomButtonRedeSocial onPress={hendleBackButtomInsta}>
+                                                <InstaIcon width="20" height="20" fill="#000000" />  
+                                                <UserInfoLogra>{userInfo.insta}</UserInfoLogra>
+                                            </CustomButtonRedeSocial>                                      
+                                        </UserInfoAreaRedeSocial>
+                                    :
+                                        <FekeArea/>
+                                    }
+                                    <UserInfoAreaRedeSocial>
+                                        <CustomButtonRedeSocial onPress={hendleBackButtomWatsapp}>
+                                            <WhatsappIcon width="20" height="20" fill="#000000" />
+                                            <UserInfoLogra>{userInfo.celular}</UserInfoLogra>
+                                        </CustomButtonRedeSocial>
+                                    </UserInfoAreaRedeSocial>
+                                    <UserInfoAreaRedeSocial>
+                                        <CustomButtonRedeSocial onPress={hendleBackButtomTelefone}>
+                                            <TelefoneIcon width="20" height="20" fill="#000000" />
+                                            <UserInfoLogra>{userInfo.telefone+"   "}</UserInfoLogra>
+                                        </CustomButtonRedeSocial>
+                                    </UserInfoAreaRedeSocial>
+                                    {userInfo.email ?
+                                        <UserInfoAreaRedeSocial>
+                                            <CustomButtonRedeSocial onPress={hendleBackButtomMail}>
+                                                <EmailIcon width="20" height="20" fill="#000000" />
+                                                <UserInfoLogra>{userInfo.email}</UserInfoLogra>
+                                            </CustomButtonRedeSocial>
+                                        </UserInfoAreaRedeSocial>
+                                        :
+                                        <FekeArea/>
+                                    }
+                                    {userInfo.site ?
+                                        <UserInfoAreaRedeSocial>
+                                            <CustomButtonRedeSocial onPress={hendleBackButtomSite}>
+                                                <SiteIcon width="20" height="20" fill="#000000" />
+                                                <UserInfoLogra>{userInfo.site}</UserInfoLogra>
+                                            </CustomButtonRedeSocial>
+                                        </UserInfoAreaRedeSocial>
+                                    :
+                                        <FekeArea/>
+                                    }
+                                    {userInfo.obs ?
+                                        <UserInfoObs>{"Observação: "+userInfo.obs}</UserInfoObs>
+                                        :
+                                        <FekeArea/>
+                                    }
+                                </UserInfoContato>
+                            </InfoContato>
+                            {atuacao && atuacao.length > 0 ?
+                                <AtuacaoArea>
+                                    <AtuacaoTituloArea>
+                                        <AtuacaoTitulo>Tipo de Turismo</AtuacaoTitulo>
+                                    </AtuacaoTituloArea>
+                                    <AtuacaoItems>
+                                        {atuacao.map((item, k)=>(
+                                            <AtuacaoItem key={k} data={item} >
+                                                <AtuacaoItemText>{item}</AtuacaoItemText>
+                                            </AtuacaoItem>
+                                        ))}
+                                    </AtuacaoItems>
+
+                                </AtuacaoArea>
+                                :
+                                <FekeArea></FekeArea>
+                            }
+                            {depoimento && depoimento.length > 0 ?
+                                <DeporimentosArea>
+                                    <Swiper
+                                        style={{height: 170}}
+                                        showsPagination={false}
+                                        showsButtons={true}
+                                        prevButton={<NavPrevIcon width="35" height="35" fill="#000000" />}
+                                        nextButton={<NavNextIcon width="35" height="35" fill="#000000" />}
+                                    >
+                                        {depoimento.map((item, k)=>(
+                                        <DeporimentoItem key={k} data={item} >
+                                            <DepoimentoTitulo>Depoimentos de Clientes</DepoimentoTitulo>
+                                            <DeporimentoInfo>
+                                                <DeporimentoItemNome>{item.nomeUser}</DeporimentoItemNome>
+                                                <Stars stars={item.estrela} showNuber={false} />
+                                            </DeporimentoInfo>
+                                            <DeporimentoItemTex>{item.desc}</DeporimentoItemTex>
+                                        </DeporimentoItem>
+                                        ))}                                
+                                    </Swiper>
+                                
+                                </DeporimentosArea>
+                                :
+                                <FekeArea></FekeArea>
+                            }
+                        </PageBody>
+                        <AreaButtoms>
+                            <InputAreaSenha>
+                                <CustomButtonProf onPress={handleSenhaClick}>
+                                    <CustomButtonTextProf>Altera Senha</CustomButtonTextProf>
+                                </CustomButtonProf>
+                                <CustomButtonProf onPress={handleLogoutClick} >
+                                    <CustomButtonTextProf>Desconectar</CustomButtonTextProf>
+                                </CustomButtonProf>                
+                            </InputAreaSenha>
                             <InputAreaSenha>
                                 <CustomButtonProf  onPress={handleAdvogadoClick}>
                                     <CustomButtonTextProf>Editar Guia</CustomButtonTextProf>
                                 </CustomButtonProf>                
                             </InputAreaSenha>
-                        }
-                    </AreaButtoms>
-
-                </InputArea>
+                        </AreaButtoms>
+                    </ScrollPerfil>
+                </InputAreaPerfil>
             }
-
-
-
-
         </ContainerTab>
     );
 }

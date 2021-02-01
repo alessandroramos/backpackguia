@@ -18,8 +18,13 @@ export const ContainerTab = styled.SafeAreaView`
 `;
 
 export const InputArea = styled.View`
+    flex: 1;
     width: 100%;
     padding: 10px;
+`;
+export const InputAreaPerfil = styled.View`
+    flex: 1;
+    width: 100%;
 `;
 export const InputAreaCamera = styled.View`
     padding: 10px;
@@ -233,6 +238,10 @@ export const InputAreaAvata = styled.View`
     align-items: center;
     margin-top: 20px;
     padding: 10px;
+`;
+export const InputAreaAvataPerfil = styled.View`
+    flex-direction: column;
+    align-items: center;
 `;
 export const UserInfoNome = styled.Text`
     font-size: 17px;

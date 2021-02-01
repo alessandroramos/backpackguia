@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Textv, 
-    Linking 
-} from 'react-native';
+import { Linking } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Swiper from 'react-native-swiper';
 import { 
