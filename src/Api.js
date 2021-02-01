@@ -2,6 +2,7 @@ import firebase from 'firebase';
 import AsyncStorage from  '@react-native-community/async-storage';
 
 //-------------------------------Conectar-----------------------------------------------
+// Base de desenvolvimento 
 let config = {
     apiKey: "AIzaSyBGncCVLvGR29wbc2H-i17RZ4kmptLUNKI",
     authDomain: "backpack-f5a42.firebaseapp.com",
